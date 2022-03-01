@@ -1,0 +1,9 @@
+{
+  "actions" : {
+    "run" : {
+      "enabled" : true,
+      "script" : "#!\/bin\/sh\nnpm run serve"
+    }
+  },
+  "identifier" : "10033FBD-0766-469F-9998-80823A4EE2D3"
+}
