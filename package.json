@@ -3,10 +3,14 @@
   "version": "0.0.1",
   "description": "Raspberry Pi Monitor",
   "main": "src/index.js",
+  "bin": {
+    "raspi-mon": "bin/raspi-mon.js"
+  },
   "scripts": {
     "server": "node src/index.js",
     "serve": "concurrently \"npm run server\" \"npm run serve:ui\"",
-    "serve:ui": "npm run serve --prefix ui"
+    "serve:ui": "npm run serve --prefix ui",
+    "build": "npm run build --prefix ui"
   },
   "repository": {
     "type": "git",
@@ -19,14 +23,20 @@
   },
   "homepage": "https://github.com/sQuarecoW/raspi-mon#readme",
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
     "fast-cli": "^3.2.0",
-    "osx-temperature-sensor": "^1.0.7",
+    "helmet": "^5.0.2",
     "socket.io": "^4.4.1",
     "speed-test": "^3.0.0",
     "systeminformation": "^5.11.0"
   },
   "devDependencies": {
+    "concurrently": "^7.0.0",
     "eslint": "^8.8.0"
+  },
+  "optionalDependencies": {
+    "osx-temperature-sensor": "^1.0.7"
   },
   "type": "module"
 }

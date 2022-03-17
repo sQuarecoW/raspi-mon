@@ -4,7 +4,8 @@ import { io } from 'socket.io-client'
 import VueSocketIOExt from 'vue-socket.io-extended'
 
 const host = location.hostname
-const socket = io('http://' + host + ':3000')
+console.log(location.host)
+const socket = io('http://' + host + ':1608')
 
 // Tailwind CSS
 import '../build/output.css'

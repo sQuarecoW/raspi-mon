@@ -4,8 +4,8 @@
   ],
   "tailwindcss.workspace.tailwindConfig" : "\/Users\/squarecow\/www\/projects\/raspi-mon\/ui\/tailwind.config.js",
   "tommasonegri.vue.serverRunning" : true,
-  "workspace.art_style" : 0,
-  "workspace.name" : "Raspberry Monitor",
+  "workspace.color" : 2,
+  "workspace.name" : "raspi-mon",
   "workspace.preview_type" : "custom",
   "workspace.preview_url" : "http:\/\/localhost:1608"
 }

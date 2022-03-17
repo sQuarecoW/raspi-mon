@@ -12,8 +12,8 @@ export default class SocketController {
 
     static io;
 
-    constructor() {
-        SocketController.io = new Server(3000, {
+    constructor(server) {
+        SocketController.io = new Server(server, {
             cors: {
                 origin: "*",
 				methods: ["GET", "POST"]
