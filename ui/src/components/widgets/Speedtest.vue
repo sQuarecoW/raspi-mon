@@ -2,12 +2,12 @@
     <widget title="Speedtest" @refresh="refresh" v-bind:can-reload="true">
         <div class="flex justify-between">
             <p class="text-l">Download</p>
-            <p class="font-bold">{{ speedtest.download }}
+            <p class="font-bold">{{ speedtest.download }} Mbps
             </p>
         </div>
 		<div class="flex justify-between">
 			<p class="text-l">Upload</p>
-			<p class="font-bold">{{ speedtest.upload }}
+			<p class="font-bold">{{ speedtest.upload }} Mbps
 			</p>
 		</div>
 		<div class="flex justify-between">

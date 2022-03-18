@@ -1,8 +1,12 @@
 import { Server } from "socket.io"
 import { exec } from "child_process"
 
-import si  from "systeminformation"
-// import speedTest from "speed-test"
+import si from "systeminformation"
+import { UniversalSpeedtest, SpeedUnits } from 'universal-speedtest'
+
+const universalSpeedtest = new UniversalSpeedtest({
+	measureUpload: true
+})
 
 export default class SocketController {
 	static #speedTests = [];
@@ -88,21 +92,22 @@ export default class SocketController {
 
 		console.log(SocketController.#speedTests)
 		console.log("runSpeedtest")
-		// do the speedtest, this will take quite a while
-		exec('fast -u --json', (error, stdout, stderror) => {
-			const output = JSON.parse(stdout)
 
-			let result = {
-				download: output.downloadSpeed,
-				upload: output.uploadSpeed,
-				latency: output.latency,
+		// do the speedtest, this will take quite a while
+		universalSpeedtest.runSpeedtestNet().then((results) => {
+			console.log(results)
+
+			const result = {
+				download: results.downloadSpeed,
+				upload: results.uploadSpeed,
+				latency: results.ping,
 				time: Date.now(),
-				userIP: output.userIp
+				userIP: results.client.ip
 			}
 			console.log(result)
 			SocketController.#speedTests.push(result);
 			SocketController.io.emit("speedtest", result)
-		});
+		})
 
 		setTimeout(() => {
 			SocketController.runSpeedtest();
