@@ -1,3 +1,5 @@
+'use-strict'
+
 import { Server } from "socket.io"
 import { exec } from "child_process"
 
@@ -17,6 +19,7 @@ export default class SocketController {
     static io;
 
     constructor(server) {
+		console.log("new socketcontroller")
         SocketController.io = new Server(server, {
             cors: {
                 origin: "*",
@@ -70,7 +73,6 @@ export default class SocketController {
 		await SocketController.getMemoryUsage()
 		await SocketController.getCpuUsage()
 		await SocketController.getCpuTemp()
-
 		setTimeout(() => {
 			SocketController.monitorSystem();
 		}, 2000);
@@ -153,7 +155,7 @@ export default class SocketController {
 		// console.log("Nova")
 		si.cpuTemperature()
 			.then((data) => {
-				console.log(data)
+				// console.log(data)
 				const temp = {
 					main: data.main,
 					time: Date.now()
