@@ -96,20 +96,24 @@ export default class SocketController {
 		console.log("runSpeedtest")
 
 		// do the speedtest, this will take quite a while
-		universalSpeedtest.runSpeedtestNet().then((results) => {
-			console.log(results)
+		universalSpeedtest.runSpeedtestNet()
+			.then((results) => {
+				// console.log(results)
 
-			const result = {
-				download: results.downloadSpeed,
-				upload: results.uploadSpeed,
-				latency: results.ping,
-				time: Date.now(),
-				userIP: results.client.ip
-			}
-			console.log(result)
-			SocketController.#speedTests.push(result);
-			SocketController.io.emit("speedtest", result)
-		})
+				const result = {
+					download: results.downloadSpeed,
+					upload: results.uploadSpeed,
+					latency: results.ping,
+					time: Date.now(),
+					userIP: results.client.ip
+				}
+				// console.log(result)
+				SocketController.#speedTests.push(result);
+				SocketController.io.emit("speedtest", result)
+			})
+			.catch((error) => {
+				console.log(error)
+			})
 
 		setTimeout(() => {
 			SocketController.runSpeedtest();
