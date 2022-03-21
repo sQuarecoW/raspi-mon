@@ -19,7 +19,7 @@
 				<font-awesome-icon icon="rotate" v-if="canReload" class="cursor-pointer text-sky-800 dark:text-sky-300" @click="refresh()" />
 			</span>
 		</div>
-		<p>{{loading}}</p>
+		<!-- <p>{{loading}}</p> -->
 		<div class="bg-amber-500" v-if="loading"><p>Aaaaa</p></div>
 		<div @loading="isLoading" class="relative">
 			<slot />

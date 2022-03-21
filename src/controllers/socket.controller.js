@@ -2,6 +2,7 @@
 
 import { Server } from "socket.io"
 import { exec } from "child_process"
+import { byValue, byNumber } from 'sort-es'
 
 import si from "systeminformation"
 import { UniversalSpeedtest, SpeedUnits } from 'universal-speedtest'
@@ -36,14 +37,14 @@ export default class SocketController {
 			});
 			socket.on("getSpeedtest", () => {
 				// console.log("getSystemInfo");
-				SocketController.runSpeedtest();
+				// SocketController.runSpeedtest();
 			});
 		});
 
 		SocketController.monitorSystem();
 		SocketController.systemTime();
 
-		SocketController.runSpeedtest();
+		// SocketController.runSpeedtest();
 
 		return SocketController.io;
     }
@@ -73,6 +74,8 @@ export default class SocketController {
 		await SocketController.getMemoryUsage()
 		await SocketController.getCpuUsage()
 		await SocketController.getCpuTemp()
+		await SocketController.getProcessList()
+
 		setTimeout(() => {
 			SocketController.monitorSystem();
 		}, 2000);
@@ -170,6 +173,29 @@ export default class SocketController {
 				SocketController.io.emit("temp", SocketController.#temp)
 			})
 			.catch((error) => console.error(error));
+	}
+
+	static async getProcessList() {
+		si.processes()
+			.then((processes) =>  {
+				const topTen = processes
+								.list
+								.sort(byValue(p => p.cpu, byNumber({desc : true})))
+								.slice(0, 6)
+								.map(p => {
+									return {
+										name: p.name,
+										cpu: p.cpu,
+										memory: p.mem,
+										pid: p.pid
+									}
+								})
+
+				SocketController.io.emit('processList', topTen)
+			})
+			.catch((error) =>  {
+				console.log(error)
+			})
 	}
 }
 

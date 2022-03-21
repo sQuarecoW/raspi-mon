@@ -1,7 +1,7 @@
 <template>
     <widget title="Temperature">
         <div class="flex absolute w-full h-full items-center justify-center font-bold text-xl z-10">{{ temp }} ° </div>
-        <LineChart ref="doughnutRef" :chartData="dataSet" :options="options" class="" style="height: 150px;"></LineChart>
+        <LineChart ref="doughnutRef" :chartData="dataSet" :options="options" class="" style="height: 180px; background-color: #fafafa;"></LineChart>
     </widget>
 </template>
 

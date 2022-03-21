@@ -23,7 +23,7 @@ export default class ServerController {
 		const server = http.createServer(app)
 
 		server.on('listening', async() => {
-			console.log(server.address())
+			console.log(`Raspi-mon interface is listening ... (port ${server.address().port})`)
 		})
 
 		return server

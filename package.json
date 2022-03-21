@@ -28,6 +28,7 @@
     "fast-cli": "^3.2.0",
     "helmet": "^5.0.2",
     "socket.io": "^4.4.1",
+    "sort-es": "^1.4.8",
     "speed-test": "^3.0.0",
     "systeminformation": "^5.11.0",
     "universal-speedtest": "^2.0.2"
