@@ -187,7 +187,8 @@ export default class SocketController {
 										name: p.name,
 										cpu: parseFloat(p.cpu).toFixed(2),
 										memory: parseFloat(p.mem).toFixed(2),
-										pid: p.pid
+										pid: p.pid,
+										path: p.path
 									}
 								})
 

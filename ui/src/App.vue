@@ -1,11 +1,11 @@
 <template>
   <div class="md:container md:mx-auto p-3 md:p-0">
     <div class="dashboard grid lg:grid-cols-3 gap-4">
-      <SystemInfoWidget></SystemInfoWidget>
       <!-- <SpeedtestWidget></SpeedtestWidget> -->
       <MemoryWidget></MemoryWidget>
       <CpuWidget></CpuWidget>
       <CpuTempWidget></CpuTempWidget>
+      <SystemInfoWidget></SystemInfoWidget>
       <ProcessListWidget></ProcessListWidget>
     </div>
   </div>

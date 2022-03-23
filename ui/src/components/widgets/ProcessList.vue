@@ -1,23 +1,23 @@
 <template>
     <widget title="Processes">
-        <table class="w-full">
-            <tr>
-                <td class="w-full"><strong>process</strong>
-                </td>
-                <td><strong>%cpu</strong>
-                </td>
-                <td><strong>%mem</strong>
-                </td>
-            </tr>
-            <tr v-for="process in processes" :key="process.pid">
-                <td class="w-full">{{ process.name }}
-                </td>
-                <td>{{ process.cpu }}
-                </td>
-                <td>{{ process.memory }}
-                </td>
-            </tr>
-        </table>
+        <div class="">
+            <div class="flex flex-row border-b">
+                <div class="flex-auto text"><strong>process</strong>
+                </div>
+                <div  class="flex-initial w-1/6 text-right"><strong>%cpu</strong>
+                </div>
+                <div  class="flex-initial w-1/6 text-right"><strong>%mem</strong>
+                </div>
+            </div>
+            <div v-for="process in processes" :key="process.pid" class="flex flex-row">
+                <div class="flex-auto pl-1" :title=process.path>{{ process.name }}
+                </div>
+                <div  class="flex-initial w-1/6 pr-1 text-right">{{ process.cpu }}
+                </div>
+                <div  class="flex-initial w-1/6 pr-1 text-right">{{ process.memory }}
+                </div>
+            </div>
+        </div>
     </widget>
 </template>
 
@@ -49,14 +49,11 @@ export default {
 
     methods: {
       updateList(processList) {
+          console.log(processList)
         this.processes = processList
       }
     },
 };
 </script>
 <style scoped>
-    td {
-        padding-left: 3px;
-        padding-right: 3px;
-    }
 </style>
