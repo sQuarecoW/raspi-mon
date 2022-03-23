@@ -185,8 +185,8 @@ export default class SocketController {
 								.map(p => {
 									return {
 										name: p.name,
-										cpu: p.cpu,
-										memory: p.mem,
+										cpu: parseFloat(p.cpu).toFixed(2),
+										memory: parseFloat(p.mem).toFixed(2),
 										pid: p.pid
 									}
 								})
