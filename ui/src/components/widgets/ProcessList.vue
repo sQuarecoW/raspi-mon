@@ -2,7 +2,7 @@
     <widget title="Processes">
         <table class="w-full">
             <tr>
-                <td><strong>process</strong>
+                <td class="w-full"><strong>process</strong>
                 </td>
                 <td><strong>%cpu</strong>
                 </td>
@@ -10,7 +10,7 @@
                 </td>
             </tr>
             <tr v-for="process in processes" :key="process.pid">
-                <td>{{ process.name }}
+                <td class="w-full">{{ process.name }}
                 </td>
                 <td>{{ process.cpu }}
                 </td>
@@ -54,4 +54,9 @@ export default {
     },
 };
 </script>
-<style scoped></style>
+<style scoped>
+    td {
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+</style>
