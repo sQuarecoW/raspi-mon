@@ -31,10 +31,10 @@ WantedBy=multi-user.target
 Type the following commands to enable and then start the service
 
 1. `sudo systemctl daemon-reload`
-2. `sudo systemctl enable camera.ui`
-3. `sudo systemctl start camera.ui`
+2. `sudo systemctl enable raspi-mon`
+3. `sudo systemctl start raspi-mon`
 
 
 Afterwards you can watch the log with following command:
 
-`sudo journalctl -f -u camera.ui`
+`sudo journalctl -f -u raspi-mon`
