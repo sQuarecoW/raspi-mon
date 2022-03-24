@@ -49,7 +49,6 @@ export default {
 
     methods: {
       updateList(processList) {
-          console.log(processList)
         this.processes = processList
       }
     },

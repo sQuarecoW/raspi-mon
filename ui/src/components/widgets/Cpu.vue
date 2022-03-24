@@ -1,7 +1,7 @@
 <template>
     <widget title="CPU">
         <div class="flex absolute w-full h-full items-center justify-center font-bold text-xl z-10">{{ load }}% </div>
-        <LineChart ref="doughnutRef" :chartData="dataSet" :options="options" class="" style="height: 180px; background-color: #fafafa;"></LineChart>
+        <LineChart ref="doughnutRef" :chartData="dataSet" :options="options" class="bg-stone-100 dark:bg-transparent" style="height: 180px;"></LineChart>
     </widget>
 </template>
 
@@ -37,8 +37,8 @@ export default {
               tension: 0.4,
               cubicInterpolationMode: 'monotone',
               fill: true,
-                backgroundColor: darkMode.isDark ? '#333' : '#DDD',
-                borderColor: darkMode.isDark ? '#111' : '#C0C0C0',
+              backgroundColor: darkMode.isDark ? '#333' : '#DDD',
+              borderColor: darkMode.isDark ? '#111' : '#C0C0C0',
           },
         ],
       },
@@ -79,14 +79,25 @@ export default {
             },
             grid: {
               display: false
-            }
+            },
+            display: false,
           }
         },
         animations: {
-          x: {
-            duration: 5000,
-            easing: 'easeOutQuart',
-          }
+            x: {
+              duration: 0,
+              easing: 'linear',
+              from: 1,
+              to: 0,
+              loop: true
+            },
+            tension: {
+                duration: 4000,
+                easing: 'linear',
+                from: 1,
+                to: 0,
+                loop: true
+              }
         }
       }
     }),

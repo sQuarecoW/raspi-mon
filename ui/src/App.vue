@@ -1,5 +1,6 @@
 <template>
   <div class="md:container md:mx-auto p-3 md:p-0">
+    <h1>Raspi-mon</h1>
     <div class="dashboard grid lg:grid-cols-3 gap-4">
       <!-- <SpeedtestWidget></SpeedtestWidget> -->
       <MemoryWidget></MemoryWidget>

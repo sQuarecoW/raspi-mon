@@ -1,7 +1,7 @@
 <template>
     <widget title="Memory">
         <div class="flex absolute w-full h-full items-center justify-center font-bold text-xl z-10">{{ used }} / {{ total }}</div>
-        <LineChart ref="doughnutRef" :chartData="dataSet" :options="options" class="" style="height: 180px; background-color: #fafafa;"></LineChart>
+        <LineChart ref="doughnutRef" :chartData="dataSet" :options="options" class="bg-stone-100 dark:bg-transparent" style="height: 180px;"></LineChart>
     </widget>
 </template>
 
@@ -44,7 +44,10 @@ export default {
         ],
       },
       options: {
+        layout: {
+        },
         responsive: true,
+        maintainAspectRatio: false,
         elements: {
           point: {
             radius: 0,
@@ -62,26 +65,27 @@ export default {
           }
         },
         scales: {
-          y: {
-            ticks: {
-              display: false,
+            y: {
+                ticks: {
+                    display: false
+                },
+                grid: {
+                    display: false
+                },
+                min: 0,
+                max: 100,
+                display: false,
+                stacked: true
             },
-            grid: {
-              display: false
-            },
-            min: 0,
-            max: 100,
-            display: false,
-            stacked: true
-          },
-          x: {
-            ticks: {
-              display: false
-            },
-            grid: {
-              display: false
+            x: {
+                ticks: {
+                    display: false
+                },
+                grid: {
+                    display: false
+                },
+                display: false,
             }
-          }
         },
         animations: {
           tension: {
