@@ -34,7 +34,6 @@ export default {
         datasets: [
           {
               data: [],
-              tension: 0.4,
               cubicInterpolationMode: 'monotone',
               fill: true,
               backgroundColor: darkMode.isDark ? '#333' : '#DDD',
@@ -87,15 +86,10 @@ export default {
             x: {
               duration: 0,
               easing: 'linear',
-              from: 1,
-              to: 0,
-              loop: true
             },
             tension: {
                 duration: 4000,
                 easing: 'linear',
-                from: 1,
-                to: 0,
                 loop: true
               }
         }

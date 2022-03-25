@@ -4,17 +4,17 @@
             <div class="flex flex-row border-b">
                 <div class="flex-auto text"><strong>process</strong>
                 </div>
-                <div  class="flex-initial w-1/6 text-right"><strong>%cpu</strong>
+                <div  class="flex-initial shrink-0 w-1/6 text-right"><strong>%cpu</strong>
                 </div>
-                <div  class="flex-initial w-1/6 text-right"><strong>%mem</strong>
+                <div  class="flex-initial shrink-0 w-1/6 text-right"><strong>%mem</strong>
                 </div>
             </div>
-            <div v-for="process in processes" :key="process.pid" class="flex flex-row">
-                <div class="flex-auto pl-1" :title=process.path>{{ process.name }}
+            <div v-for="process in processes" :key="process.pid" class="flex flex-row process">
+                <div class="flex-auto pl-1 truncate" :title=process.path>{{ process.name }}
                 </div>
-                <div  class="flex-initial w-1/6 pr-1 text-right">{{ process.cpu }}
+                <div  class="flex-initial shrink-0 w-1/6 pr-1 text-right">{{ process.cpu }}
                 </div>
-                <div  class="flex-initial w-1/6 pr-1 text-right">{{ process.memory }}
+                <div  class="flex-initial shrink-0 w-1/6 pr-1 text-right">{{ process.memory }}
                 </div>
             </div>
         </div>
@@ -34,7 +34,8 @@ export default {
     data: () => ({
       loading: true,
 
-      processes: []
+      processes: [],
+      count: 1
     }),
 
     async mounted() {
@@ -49,7 +50,11 @@ export default {
 
     methods: {
       updateList(processList) {
+          if (this.count == 1) {
         this.processes = processList
+        // this.count++
+
+          }
       }
     },
 };

@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="bg-white dark:bg-neutral-600 rounded-md space-y-1 p-4 text-slate-800 dark:text-slate-100 ring-1 ring-slate-200 dark:ring-0 shadow-md shadow-slate-100 dark:shadow-none"
+		class="bg-white dark:bg-stone-600 rounded-md space-y-1 p-4 text-stone-800 dark:text-stone-100 ring-1 ring-stone-200 dark:ring-0 shadow-md shadow-stone-100 dark:shadow-none"
 	@mouseenter="toggleOptions"
 	@mouseleave="toggleOptions"
 	>

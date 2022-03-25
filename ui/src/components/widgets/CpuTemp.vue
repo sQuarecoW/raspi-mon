@@ -37,8 +37,8 @@ export default {
               tension: 0.4,
               cubicInterpolationMode: 'monotone',
               fill: true,
-                backgroundColor: darkMode.isDark ? '#333' : '#DDD',
-                borderColor: darkMode.isDark ? '#111' : '#C0C0C0',
+              backgroundColor: darkMode.isDark ? '#333' : '#DDD',
+              borderColor: darkMode.isDark ? '#111' : '#C0C0C0',
           },
         ],
       },
@@ -82,6 +82,17 @@ export default {
             display: false,
           }
         },
+        animations: {
+            x: {
+              duration: 0,
+              easing: 'linear',
+            },
+            tension: {
+                duration: 4000,
+                easing: 'linear',
+                loop: true
+              }
+        }
       }
     }),
 

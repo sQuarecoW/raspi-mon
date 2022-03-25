@@ -1,6 +1,9 @@
 <template>
-  <div class="md:container md:mx-auto p-3 md:p-0">
-    <h1>Raspi-mon</h1>
+  <div class="md:container md:mx-auto p-3 md:p-0 text-stone-800 dark:text-stone-100">
+    <div class="flex content-center items-baseline space-x-4 pb-3">
+      <h1>{{ title }}</h1>
+      <a :href=url class="text-lime-600 font-medium">{{ link }}</a>
+    </div>
     <div class="dashboard grid lg:grid-cols-3 gap-4">
       <!-- <SpeedtestWidget></SpeedtestWidget> -->
       <MemoryWidget></MemoryWidget>
@@ -29,6 +32,35 @@ export default {
     CpuWidget,
     CpuTempWidget,
     ProcessListWidget
+  },
+
+  data: () => ({
+      loading: true,
+      title: 'raspi-mon',
+      url: '',
+      link: ''
+  }),
+
+  async mounted() {
+      this.$socket.client.on("systemInfo", this.systemInfo);
+      this.$socket.client.emit("getSystemInfo");
+
+      this.loading = false;
+
+      this.url = location.href
+      this.link = location.host
+  },
+
+  beforeUnmount() {
+      this.$socket.client.off("systemInfo", this.systemInfo);
+  },
+  methods: {
+    systemInfo(data) {
+        this.system = data
+
+        // set the hostname
+        this.title = `${data.osInfo.hostname} | raspi-mon`
+    },
   }
 }
 </script>

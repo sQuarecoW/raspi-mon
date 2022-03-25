@@ -88,13 +88,15 @@ export default {
             }
         },
         animations: {
-          tension: {
-            duration: 1000,
-            easing: 'linear',
-            from: 1,
-            to: 0,
-            loop: true
-          }
+            x: {
+              duration: 0,
+              easing: 'linear',
+            },
+            tension: {
+                duration: 4000,
+                easing: 'linear',
+                loop: true
+              }
         }
       }
     }),
