@@ -87,11 +87,15 @@ class PiConnection {
 		}
 	}
 
-	private onMem(r?: { used?: number; total?: number }): void {
-		if (r && typeof r.used === "number" && typeof r.total === "number" && r.total > 0) {
-			this.data.memUsed = r.used;
+	private onMem(r?: { used?: number; total?: number; available?: number }): void {
+		if (r && typeof r.total === "number" && r.total > 0) {
+			// Real usage excludes reclaimable disk cache: total - available
+			// (matches `free`/top). Fall back to `used` if available is absent.
+			const used = typeof r.available === "number" ? r.total - r.available : r.used;
+			if (typeof used !== "number") return;
+			this.data.memUsed = used;
 			this.data.memTotal = r.total;
-			this.data.memPercent = (r.used / r.total) * 100;
+			this.data.memPercent = (used / r.total) * 100;
 			this.push();
 		}
 	}
