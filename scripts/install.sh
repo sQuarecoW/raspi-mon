@@ -43,6 +43,14 @@ if [ "$NODE_MAJOR" -lt 18 ]; then
 fi
 echo "Using node $($NODE_BIN -v) at $NODE_BIN"
 
+if ! command -v npm >/dev/null 2>&1; then
+	echo "ERROR: npm is not installed (found node but not npm)." >&2
+	echo "On Raspberry Pi OS the 'nodejs' apt package does not bundle npm." >&2
+	echo "Install a current Node.js (node + npm together) via NodeSource:" >&2
+	echo "  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt-get install -y nodejs" >&2
+	exit 1
+fi
+
 # --- dependencies (production only) -------------------------------------------
 echo
 echo "Installing production dependencies..."

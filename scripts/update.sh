@@ -15,6 +15,12 @@ cd "$REPO_DIR"
 
 echo "Updating raspi-mon in $REPO_DIR"
 
+if ! command -v npm >/dev/null 2>&1; then
+	echo "ERROR: npm is not installed. Install Node.js (with npm) via NodeSource:" >&2
+	echo "  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt-get install -y nodejs" >&2
+	exit 1
+fi
+
 echo "==> git pull"
 git pull --ff-only
 
