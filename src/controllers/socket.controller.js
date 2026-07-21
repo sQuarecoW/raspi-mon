@@ -31,6 +31,12 @@ export default class SocketController {
 		SocketController.io.on("connection", (socket) => {
 			// console.log("connection");
 
+			// Send the buffered history once, so a fresh client draws a full
+			// chart immediately. After this it only receives single new points.
+			socket.emit("cpu:init", SocketController.#cpuUsage);
+			socket.emit("memory:init", SocketController.#memoryUsage);
+			socket.emit("temp:init", SocketController.#temp);
+
 			socket.on("getSystemInfo", () => {
 				// console.log("getSystemInfo");
 				SocketController.systemInfo();
@@ -65,16 +71,22 @@ export default class SocketController {
 	}
 
 	static async monitorSystem() {
-		// console.log("Nova")
-		// si.processLoad("Nova")
-		// 	.then((data) => {
-		// 		SocketController.io.emit("process", data[0]);
-		// 	})
-		// 	.catch((error) => console.error(error));
-		await SocketController.getMemoryUsage()
-		await SocketController.getCpuUsage()
-		await SocketController.getCpuTemp()
-		await SocketController.getProcessList()
+		// Only do the (relatively expensive) polling while someone is actually
+		// watching the dashboard. On an idle Pi with no browser connected this
+		// keeps the process essentially free.
+		if (SocketController.io.engine.clientsCount > 0) {
+			// Guard every cycle: a single failing sensor (e.g. an unavailable
+			// native temperature module) must never take the whole loop down.
+			try {
+				await SocketController.getMemoryUsage()
+				await SocketController.getCpuUsage()
+				await SocketController.getCpuTemp()
+				await SocketController.getProcessList()
+				await SocketController.getProcessStatus()
+			} catch (error) {
+				console.error('monitorSystem cycle failed:', error)
+			}
+		}
 
 		setTimeout(() => {
 			SocketController.monitorSystem();
@@ -82,7 +94,9 @@ export default class SocketController {
 	}
 
 	static systemTime() {
-		SocketController.io.emit("systemTime", si.time());
+		if (SocketController.io.engine.clientsCount > 0) {
+			SocketController.io.emit("systemTime", si.time());
+		}
 
 		setTimeout(() => {
 			SocketController.systemTime();
@@ -134,10 +148,12 @@ export default class SocketController {
 					buffcache: data.buffcache,
 					time: Date.now()
 				}
-				SocketController.#memoryUsage = SocketController.#memoryUsage.slice(-50)
 				SocketController.#memoryUsage.push(mem)
+				SocketController.#memoryUsage = SocketController.#memoryUsage.slice(-50)
 
-				SocketController.io.emit("memory", SocketController.#memoryUsage)
+				// Broadcast just the new point; new clients get the history via
+				// the "memory:init" snapshot on connect.
+				SocketController.io.emit("memory", mem)
 			})
 			.catch((error) => console.error(error));
 	}
@@ -150,10 +166,10 @@ export default class SocketController {
 					currentLoad: data.currentLoad,
 					time: Date.now()
 				}
-				SocketController.#cpuUsage = SocketController.#cpuUsage.slice(-50)
 				SocketController.#cpuUsage.push(cpu)
+				SocketController.#cpuUsage = SocketController.#cpuUsage.slice(-50)
 
-				SocketController.io.emit("cpu", SocketController.#cpuUsage)
+				SocketController.io.emit("cpu", cpu)
 			})
 			.catch((error) => console.error(error));
 	}
@@ -167,10 +183,10 @@ export default class SocketController {
 					main: data.main,
 					time: Date.now()
 				}
-				SocketController.#temp = SocketController.#temp.slice(-50)
 				SocketController.#temp.push(temp)
+				SocketController.#temp = SocketController.#temp.slice(-50)
 
-				SocketController.io.emit("temp", SocketController.#temp)
+				SocketController.io.emit("temp", temp)
 			})
 			.catch((error) => console.error(error));
 	}
@@ -193,6 +209,18 @@ export default class SocketController {
 								})
 
 				SocketController.io.emit('processList', topTen)
+			})
+			.catch((error) =>  {
+				console.log(error)
+			})
+	}
+
+	static async getProcessStatus() {
+		const processName = 'raspi-mon'
+
+		si.processLoad(processName)
+			.then((data) => {
+				SocketController.io.emit(`process_${processName}`, data[0]);
 			})
 			.catch((error) =>  {
 				console.log(error)

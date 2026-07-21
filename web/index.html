@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>raspi-mon</title>
+	<link rel="icon" href="/favicon.ico">
+	<link rel="stylesheet" href="vendor/uPlot.min.css">
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<header class="topbar">
+		<div class="brand">
+			<span class="dot" id="conn-dot" title="disconnected"></span>
+			<strong id="hostname">raspi-mon</strong>
+			<span class="sub" id="model"></span>
+		</div>
+		<div class="topbar-right">
+			<span class="sub">uptime <b id="uptime">—</b></span>
+			<span class="clock" id="clock">—</span>
+		</div>
+	</header>
+
+	<main class="grid">
+		<section class="card">
+			<div class="card-head"><h2>CPU load</h2><span class="metric" id="cpu-val">—</span></div>
+			<div class="chart" id="cpu-chart"></div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><h2>Memory</h2><span class="metric" id="mem-val">—</span></div>
+			<div class="chart" id="mem-chart"></div>
+			<div class="sub" id="mem-detail"></div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><h2>CPU temp</h2><span class="metric" id="temp-val">—</span></div>
+			<div class="chart" id="temp-chart"></div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><h2>System</h2></div>
+			<dl class="kv" id="sysinfo"><dt>waiting…</dt><dd></dd></dl>
+		</section>
+
+		<section class="card span-2">
+			<div class="card-head"><h2>Top processes</h2></div>
+			<table class="proc">
+				<thead><tr><th>Process</th><th class="num">CPU %</th><th class="num">Mem %</th><th class="num">PID</th></tr></thead>
+				<tbody id="proc-body"><tr><td colspan="4" class="muted">waiting…</td></tr></tbody>
+			</table>
+		</section>
+	</main>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="vendor/uPlot.iife.min.js"></script>
+	<script src="app.js"></script>
+</body>
+</html>
