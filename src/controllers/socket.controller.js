@@ -29,7 +29,7 @@ function parseTop(stdout) {
 		}))
 		.filter((p) => !isNaN(p.cpu))
 		.sort((a, b) => b.cpu - a.cpu)
-		.slice(0, 6)
+		.slice(0, 10)
 		.map((p) => ({
 			name: p.name,
 			cpu: p.cpu.toFixed(2),
@@ -47,7 +47,7 @@ function parsePs(stdout) {
 		.map((line) => line.trim().split(/\s+/))
 		.filter((p) => /^\d+$/.test(p[0]))
 		.filter((p) => p[3] !== "ps")
-		.slice(0, 6)
+		.slice(0, 10)
 		.map(([pid, cpu, mem, ...name]) => ({
 			name: name.join(" "),
 			cpu: parseFloat(cpu).toFixed(2),
@@ -111,9 +111,9 @@ export default class SocketController {
 
 	// Cheap /proc reads (memory, CPU load, temperature) refresh quickly...
 	static #FAST_INTERVAL = 2000;
-	// ...but the process list needs a full `ps` sweep, which is by far the most
-	// expensive call on a Pi, so it refreshes much less often.
-	static #PROCESS_INTERVAL = 8000;
+	// ...and the process list (a lightweight `top -bn2`, ~0.5s to sample) now
+	// refreshes almost as often.
+	static #PROCESS_INTERVAL = 3000;
 
 	static async monitorSystem() {
 		// Only do the polling while someone is actually watching the dashboard.
