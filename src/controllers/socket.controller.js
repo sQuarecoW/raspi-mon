@@ -168,6 +168,9 @@ export default class SocketController {
 				const mem = {
 					total: data.total,
 					used: data.used,
+					// `available` is the kernel's reclaimable-aware figure (MemAvailable):
+					// total - available is real usage, excluding reclaimable disk cache.
+					available: data.available,
 					active: data.active,
 					buffcache: data.buffcache,
 					time: Date.now()

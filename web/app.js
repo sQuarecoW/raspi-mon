@@ -110,11 +110,14 @@ socket.on('cpu:init', (rows) => { cpuChart.init(rows, cpuPick); cpuLabel(rows[ro
 socket.on('cpu', (row) => { cpuChart.append(row, cpuPick); cpuLabel(row); });
 
 // --- Memory -----------------------------------------------------------------
-const memPick = (r) => (r.used / r.total) * 100;
+// Real usage excludes reclaimable disk cache: total - available (like `free`
+// and top's "avail Mem"). Falls back to `used` if the server didn't send it.
+const memUsed = (r) => (r.available != null ? r.total - r.available : r.used);
+const memPick = (r) => (memUsed(r) / r.total) * 100;
 const memLabel = (r) => {
 	if (!r) return;
-	$('mem-val').textContent = `${((r.used / r.total) * 100).toFixed(0)}%`;
-	$('mem-detail').textContent = `${bytes(r.used)} / ${bytes(r.total)} used`;
+	$('mem-val').textContent = `${memPick(r).toFixed(0)}%`;
+	$('mem-detail').textContent = `${bytes(memUsed(r))} / ${bytes(r.total)} used`;
 };
 socket.on('memory:init', (rows) => { memChart.init(rows, memPick); memLabel(rows[rows.length - 1]); });
 socket.on('memory', (row) => { memChart.append(row, memPick); memLabel(row); });
