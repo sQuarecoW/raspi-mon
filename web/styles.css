@@ -33,16 +33,20 @@ body {
 }
 
 .topbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
-	padding: 12px 20px;
 	background: var(--card);
 	border-bottom: 1px solid var(--border);
 	position: sticky;
 	top: 0;
 	z-index: 5;
+}
+.topbar-inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 12px 20px;
 }
 
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
