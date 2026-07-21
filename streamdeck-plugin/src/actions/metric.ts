@@ -48,10 +48,11 @@ export class MetricAction extends SingletonAction<MetricSettings> {
 
 	private bind(action: WillAppearEvent<MetricSettings>["action"], settings: MetricSettings): void {
 		const metric: Metric = settings.metric ?? "cpu";
+		const host = (settings.host ?? "").trim() || DEFAULT_HOST;
 		const connection = getConnection(urlFrom(settings));
 
 		const unsubscribe = connection.subscribe((data) => {
-			const { image, title } = render(metric, data);
+			const { image, title } = render(metric, data, host);
 			if ("setImage" in action) {
 				void action.setImage(image);
 				void action.setTitle(title);

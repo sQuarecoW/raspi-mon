@@ -8,7 +8,7 @@
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "validate": "streamdeck validate com.squarecow.raspi-mon.sdPlugin",
-    "pack": "npm run build && streamdeck pack com.squarecow.raspi-mon.sdPlugin --output dist",
+    "pack": "npm run build && streamdeck pack com.squarecow.raspi-mon.sdPlugin --output dist --force",
     "restart": "streamdeck restart com.squarecow.raspi-mon"
   },
   "dependencies": {
