@@ -94,20 +94,20 @@ function truncate(s: string, max: number): string {
 /** Draw a single button face. */
 function card(opts: { host?: string; label: string; big: string; sub?: string; accent: string; bar?: number; muted?: boolean }): string {
 	const { host, label, big, sub, accent, bar, muted } = opts;
-	const bigSize = big.length >= 6 ? 30 : big.length >= 4 ? 40 : 48;
-	const bigY = sub ? 86 : 94;
-	const hostRow = host ? `<text x="72" y="21" fill="${MUTED}" font-size="12" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif">${escapeXml(truncate(host, 17))}</text>` : "";
+	const bigSize = big.length >= 6 ? 28 : big.length >= 4 ? 38 : 44;
+	const bigY = sub ? 92 : 102;
+	const hostRow = host ? `<text x="72" y="31" fill="#c2cad3" font-size="22" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-weight="600">${escapeXml(truncate(host, 12))}</text>` : "";
 	const barRow =
 		bar != null
-			? `<rect x="18" y="120" width="108" height="10" rx="5" fill="#242c34"/>
-			   <rect x="18" y="120" width="${Math.max(0, Math.min(108, 108 * bar))}" height="10" rx="5" fill="${accent}"/>`
+			? `<rect x="18" y="124" width="108" height="9" rx="4.5" fill="#242c34"/>
+			   <rect x="18" y="124" width="${Math.max(0, Math.min(108, 108 * bar))}" height="9" rx="4.5" fill="${accent}"/>`
 			: "";
-	const subRow = sub ? `<text x="72" y="108" fill="${MUTED}" font-size="14" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif">${escapeXml(sub)}</text>` : "";
+	const subRow = sub ? `<text x="72" y="113" fill="${MUTED}" font-size="13" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif">${escapeXml(sub)}</text>` : "";
 	return svgToImage(`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
 	<rect width="144" height="144" rx="18" fill="${BG}"/>
 	<rect x="0" y="0" width="144" height="6" fill="${accent}"/>
 	${hostRow}
-	<text x="72" y="46" fill="${muted ? MUTED : accent}" font-size="15" letter-spacing="1.4" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-weight="600">${escapeXml(label.toUpperCase())}</text>
+	<text x="72" y="55" fill="${muted ? MUTED : accent}" font-size="14" letter-spacing="1.4" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-weight="600">${escapeXml(label.toUpperCase())}</text>
 	<text x="72" y="${bigY}" fill="${TEXT}" font-size="${bigSize}" text-anchor="middle" font-family="system-ui,Segoe UI,Roboto,sans-serif" font-weight="700">${escapeXml(big)}</text>
 	${subRow}
 	${barRow}
