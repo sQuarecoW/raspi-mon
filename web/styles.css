@@ -118,6 +118,17 @@ body {
 	transition: width .4s ease, background-color .4s ease;
 }
 
+.netrow {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--border);
+}
+.netrow:last-child { border-bottom: 0; }
+.netlabel { color: var(--muted); font-size: 13px; }
+.netval { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
 /* uPlot dark-mode legibility */
 @media (prefers-color-scheme: dark) {
 	.u-legend { color: var(--muted); }

@@ -130,6 +130,7 @@ export default class SocketController {
 				await SocketController.getMemoryUsage()
 				await SocketController.getCpuUsage()
 				await SocketController.getCpuTemp()
+				await SocketController.getNetworkStats()
 			} catch (error) {
 				console.error('monitorSystem cycle failed:', error)
 			}
@@ -236,6 +237,23 @@ export default class SocketController {
 				SocketController.#temp = SocketController.#temp.slice(-50)
 
 				SocketController.io.emit("temp", temp)
+			})
+			.catch((error) => console.error(error));
+	}
+
+	static async getNetworkStats() {
+		// Default external interface; rx_sec/tx_sec are bytes/sec (null on the
+		// very first sample, then valid on subsequent polls).
+		si.networkStats()
+			.then((data) => {
+				const net = data && data[0]
+				if (!net) return
+				SocketController.io.emit("network", {
+					iface: net.iface,
+					rx: net.rx_sec,
+					tx: net.tx_sec,
+					time: Date.now()
+				})
 			})
 			.catch((error) => console.error(error));
 	}

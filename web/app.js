@@ -143,6 +143,15 @@ socket.on('disk', (d) => {
 	$('disk-detail').textContent = `${bytes(d.used)} / ${bytes(d.total)} used${mount}`;
 });
 
+// --- Network ----------------------------------------------------------------
+const rate = (n) => (n == null || isNaN(n)) ? '—' : `${bytes(n)}/s`;
+socket.on('network', (n) => {
+	if (!n) return;
+	if (n.iface) $('net-iface').textContent = n.iface;
+	$('net-rx').textContent = rate(n.rx);
+	$('net-tx').textContent = rate(n.tx);
+});
+
 // --- CPU temperature --------------------------------------------------------
 // A host without a sensor reports null/0; keep the axis but show a dash.
 const tempPick = (r) => r.main;
