@@ -35,6 +35,7 @@ export default class SocketController {
 		});
 
 		SocketController.monitorSystem();
+		SocketController.monitorProcesses();
 		SocketController.systemTime();
 
 		return SocketController.io;
@@ -55,10 +56,15 @@ export default class SocketController {
 			})
 	}
 
+	// Cheap /proc reads (memory, CPU load, temperature) refresh quickly...
+	static #FAST_INTERVAL = 2000;
+	// ...but the process list needs a full `ps` sweep, which is by far the most
+	// expensive call on a Pi, so it refreshes much less often.
+	static #PROCESS_INTERVAL = 8000;
+
 	static async monitorSystem() {
-		// Only do the (relatively expensive) polling while someone is actually
-		// watching the dashboard. On an idle Pi with no browser connected this
-		// keeps the process essentially free.
+		// Only do the polling while someone is actually watching the dashboard.
+		// On an idle Pi with no browser connected this keeps the process free.
 		if (SocketController.io.engine.clientsCount > 0) {
 			// Guard every cycle: a single failing sensor (e.g. an unavailable
 			// native temperature module) must never take the whole loop down.
@@ -66,8 +72,6 @@ export default class SocketController {
 				await SocketController.getMemoryUsage()
 				await SocketController.getCpuUsage()
 				await SocketController.getCpuTemp()
-				await SocketController.getProcessList()
-				await SocketController.getProcessStatus()
 			} catch (error) {
 				console.error('monitorSystem cycle failed:', error)
 			}
@@ -75,7 +79,23 @@ export default class SocketController {
 
 		setTimeout(() => {
 			SocketController.monitorSystem();
-		}, 2000);
+		}, SocketController.#FAST_INTERVAL);
+	}
+
+	static async monitorProcesses() {
+		// si.processes() enumerates every process via `ps`; keep it on a slow
+		// cadence so it doesn't dominate CPU on a Raspberry Pi.
+		if (SocketController.io.engine.clientsCount > 0) {
+			try {
+				await SocketController.getProcessList()
+			} catch (error) {
+				console.error('monitorProcesses cycle failed:', error)
+			}
+		}
+
+		setTimeout(() => {
+			SocketController.monitorProcesses();
+		}, SocketController.#PROCESS_INTERVAL);
 	}
 
 	static systemTime() {
@@ -160,18 +180,6 @@ export default class SocketController {
 								})
 
 				SocketController.io.emit('processList', topTen)
-			})
-			.catch((error) =>  {
-				console.log(error)
-			})
-	}
-
-	static async getProcessStatus() {
-		const processName = 'raspi-mon'
-
-		si.processLoad(processName)
-			.then((data) => {
-				SocketController.io.emit(`process_${processName}`, data[0]);
 			})
 			.catch((error) =>  {
 				console.log(error)
