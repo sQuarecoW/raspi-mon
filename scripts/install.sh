@@ -45,8 +45,10 @@ echo "Using node $($NODE_BIN -v) at $NODE_BIN"
 
 if ! command -v npm >/dev/null 2>&1; then
 	echo "ERROR: npm is not installed (found node but not npm)." >&2
-	echo "On Raspberry Pi OS the 'nodejs' apt package does not bundle npm." >&2
-	echo "Install a current Node.js (node + npm together) via NodeSource:" >&2
+	echo "On Debian / Raspberry Pi OS the 'nodejs' apt package does not bundle npm." >&2
+	echo "Node is already present, so the quickest fix is:" >&2
+	echo "  sudo apt install npm" >&2
+	echo "Or, to install a newer node + npm together, use NodeSource:" >&2
 	echo "  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt-get install -y nodejs" >&2
 	exit 1
 fi

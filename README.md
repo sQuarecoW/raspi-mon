@@ -10,13 +10,15 @@ The dashboard is served on **port 1608**: `http://<pi-ip>:1608/`
 ## Requirements
 
 - Node.js 18 or newer, **including npm**. On Raspberry Pi OS / Debian the plain
-  `nodejs` apt package does *not* bundle npm — install a current version via
-  [NodeSource](https://github.com/nodesource/distributions) instead, which
-  provides both:
-  ```sh
-  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-  ```
+  `nodejs` apt package does *not* bundle npm:
+  - If `node -v` already reports 18+ (recent Raspberry Pi OS ships Node 20),
+    just add npm: `sudo apt install npm`.
+  - Otherwise install a current node + npm together via
+    [NodeSource](https://github.com/nodesource/distributions):
+    ```sh
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    ```
   Verify with `node -v && npm -v`.
 
 ## Install (as a systemd service)
