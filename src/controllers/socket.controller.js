@@ -1,18 +1,9 @@
-'use-strict'
-
 import { Server } from "socket.io"
-import { exec } from "child_process"
 import { byValue, byNumber } from 'sort-es'
 
 import si from "systeminformation"
-import { UniversalSpeedtest, SpeedUnits } from 'universal-speedtest'
-
-const universalSpeedtest = new UniversalSpeedtest({
-	measureUpload: true
-})
 
 export default class SocketController {
-	static #speedTests = [];
 	static #memoryUsage = [];
 	static #cpuUsage = [];
 	static #temp = [];
@@ -41,16 +32,10 @@ export default class SocketController {
 				// console.log("getSystemInfo");
 				SocketController.systemInfo();
 			});
-			socket.on("getSpeedtest", () => {
-				// console.log("getSystemInfo");
-				// SocketController.runSpeedtest();
-			});
 		});
 
 		SocketController.monitorSystem();
 		SocketController.systemTime();
-
-		// SocketController.runSpeedtest();
 
 		return SocketController.io;
     }
@@ -101,40 +86,6 @@ export default class SocketController {
 		setTimeout(() => {
 			SocketController.systemTime();
 		}, 1000);
-	}
-
-	static runSpeedtest() {
-		// if there is already a speedtest, push the last one now
-		if (SocketController.#speedTests.length > 0) {
-			SocketController.io.emit("speedtest", SocketController.#speedTests[SocketController.#speedTests.length - 1])
-		}
-
-		console.log(SocketController.#speedTests)
-		console.log("runSpeedtest")
-
-		// do the speedtest, this will take quite a while
-		universalSpeedtest.runSpeedtestNet()
-			.then((results) => {
-				// console.log(results)
-
-				const result = {
-					download: results.downloadSpeed,
-					upload: results.uploadSpeed,
-					latency: results.ping,
-					time: Date.now(),
-					userIP: results.client.ip
-				}
-				// console.log(result)
-				SocketController.#speedTests.push(result);
-				SocketController.io.emit("speedtest", result)
-			})
-			.catch((error) => {
-				console.log(error)
-			})
-
-		setTimeout(() => {
-			SocketController.runSpeedtest();
-		}, 12*60*60*1000);
 	}
 
 	static async getMemoryUsage() {

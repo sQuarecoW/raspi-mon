@@ -18,10 +18,8 @@ export default class ServerController {
 		app.use(express.json())
 		app.use(express.urlencoded({ extended: true }))
 
-		// New build-less vanilla + uPlot dashboard, served alongside the old one.
-		app.use('/v2', express.static(path.join(__dirname, '../../web')))
-
-		app.use(express.static(path.join(__dirname, '../../monitor')))
+		// Build-less vanilla + uPlot dashboard.
+		app.use(express.static(path.join(__dirname, '../../web')))
 
 		const server = http.createServer(app)
 
