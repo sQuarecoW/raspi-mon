@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
 	"UUID": "com.squarecow.raspi-mon",
 	"Name": "raspi-mon",
-	"Version": "1.0.0.0",
+	"Version": "1.1.0.0",
 	"Author": "sQuarecoW",
 	"URL": "https://github.com/sQuarecoW/raspi-mon",
 	"Description": "Show Raspberry Pi CPU, memory, temperature and uptime from raspi-mon on your Stream Deck.",
