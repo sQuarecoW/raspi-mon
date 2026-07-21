@@ -183,6 +183,10 @@ export default class SocketController {
 				.split("\n")
 				.map((line) => line.trim().split(/\s+/))
 				.filter((p) => /^\d+$/.test(p[0])) // drop header / blank lines
+				// Our own `ps` is a just-spawned process, so its %cpu (which ps
+				// reports as cpu-time / lifetime) is a meaningless spike — often
+				// 200-300%. Drop it so it can't dominate the sorted list.
+				.filter((p) => p[3] !== "ps")
 				.slice(0, 6)
 				.map(([pid, cpu, mem, ...name]) => ({
 					name: name.join(" "),
