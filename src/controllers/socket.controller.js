@@ -3,6 +3,59 @@ import { exec } from "child_process"
 
 import si from "systeminformation"
 
+// Parse the *second* frame of `top -bn2` output. top computes instantaneous
+// CPU by diffing two samples (like htop), so the values match `top`/`htop` and
+// there is no newborn-process artifact. Default columns are:
+//   PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
+function parseTop(stdout) {
+	const lines = stdout.split("\n")
+
+	// The output holds two frames; take the rows after the *last* header line.
+	let start = -1
+	for (let i = 0; i < lines.length; i++) {
+		if (/^\s*PID\s+USER.+%CPU/.test(lines[i])) start = i + 1
+	}
+	if (start < 0) return []
+
+	return lines
+		.slice(start)
+		.map((line) => line.trim().split(/\s+/))
+		.filter((p) => /^\d+$/.test(p[0]) && p.length >= 12)
+		.map((p) => ({
+			pid: p[0],
+			cpu: parseFloat(p[8]),
+			memory: parseFloat(p[9]),
+			name: p.slice(11).join(" "),
+		}))
+		.filter((p) => !isNaN(p.cpu))
+		.sort((a, b) => b.cpu - a.cpu)
+		.slice(0, 6)
+		.map((p) => ({
+			name: p.name,
+			cpu: p.cpu.toFixed(2),
+			memory: p.memory.toFixed(2),
+			pid: p.pid,
+		}))
+}
+
+// macOS (dev only): BSD `ps` sorted by CPU. Its %cpu is a lifetime average, so
+// we drop the just-spawned `ps` process itself (its ratio spikes past 100%).
+function parsePs(stdout) {
+	return stdout
+		.trim()
+		.split("\n")
+		.map((line) => line.trim().split(/\s+/))
+		.filter((p) => /^\d+$/.test(p[0]))
+		.filter((p) => p[3] !== "ps")
+		.slice(0, 6)
+		.map(([pid, cpu, mem, ...name]) => ({
+			name: name.join(" "),
+			cpu: parseFloat(cpu).toFixed(2),
+			memory: parseFloat(mem).toFixed(2),
+			pid,
+		}))
+}
+
 export default class SocketController {
 	static #memoryUsage = [];
 	static #cpuUsage = [];
@@ -163,38 +216,21 @@ export default class SocketController {
 	}
 
 	static getProcessList() {
-		// A narrow, direct `ps` is far cheaper than systeminformation's full
-		// sweep: four columns only, sorted by the kernel, and we keep the top
-		// few. `comm` is the process name, so there are no expensive per-process
-		// cmdline reads.
-		const cmd =
-			process.platform === "darwin"
-				? "ps -Ac -o pid,pcpu,pmem,comm -r" // BSD / macOS (dev)
-				: "ps -eo pid,pcpu,pmem,comm --sort=-pcpu --no-headers" // Linux / Raspberry Pi
+		// On the Pi, use `top -bn2` for instantaneous, top/htop-matching CPU%
+		// (it diffs two samples). LC_ALL=C keeps the numbers dot-decimal and the
+		// columns predictable. macOS has a different top, so dev falls back to ps.
+		const isDarwin = process.platform === "darwin"
+		const cmd = isDarwin
+			? "ps -Ac -o pid,pcpu,pmem,comm -r"
+			: "LC_ALL=C top -bn2 -d 0.5 -w 512"
 
-		exec(cmd, { timeout: 5000, maxBuffer: 1024 * 1024 }, (error, stdout) => {
+		exec(cmd, { timeout: 8000, maxBuffer: 4 * 1024 * 1024 }, (error, stdout) => {
 			if (error) {
 				console.error(error)
 				return
 			}
 
-			const list = stdout
-				.trim()
-				.split("\n")
-				.map((line) => line.trim().split(/\s+/))
-				.filter((p) => /^\d+$/.test(p[0])) // drop header / blank lines
-				// Our own `ps` is a just-spawned process, so its %cpu (which ps
-				// reports as cpu-time / lifetime) is a meaningless spike — often
-				// 200-300%. Drop it so it can't dominate the sorted list.
-				.filter((p) => p[3] !== "ps")
-				.slice(0, 6)
-				.map(([pid, cpu, mem, ...name]) => ({
-					name: name.join(" "),
-					cpu: parseFloat(cpu).toFixed(2),
-					memory: parseFloat(mem).toFixed(2),
-					pid,
-				}))
-
+			const list = isDarwin ? parsePs(stdout) : parseTop(stdout)
 			SocketController.io.emit("processList", list)
 		})
 	}
