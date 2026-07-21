@@ -139,7 +139,7 @@ socket.on('disk', (d) => {
 	const fill = $('disk-fill');
 	fill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
 	fill.style.background = heatColor(pct / 100);
-	const mount = d.mount && d.mount !== '/' ? ` (${d.mount})` : '';
+	const mount = d.mount ? ` · ${d.mount}` : '';
 	$('disk-detail').textContent = `${bytes(d.used)} / ${bytes(d.total)} used${mount}`;
 });
 

@@ -19,6 +19,7 @@ export type PiData = {
 	diskPercent?: number; // %
 	diskUsed?: number; // bytes
 	diskTotal?: number; // bytes
+	diskMount?: string; // e.g. "/"
 	uptime?: number; // seconds
 	hostname?: string;
 };
@@ -111,11 +112,12 @@ class PiConnection {
 		}
 	}
 
-	private onDisk(r?: { total?: number; used?: number; use?: number }): void {
+	private onDisk(r?: { total?: number; used?: number; use?: number; mount?: string }): void {
 		if (r && typeof r.total === "number" && r.total > 0 && typeof r.used === "number") {
 			this.data.diskTotal = r.total;
 			this.data.diskUsed = r.used;
 			this.data.diskPercent = typeof r.use === "number" ? r.use : (r.used / r.total) * 100;
+			this.data.diskMount = r.mount;
 			this.push();
 		}
 	}

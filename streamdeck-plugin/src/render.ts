@@ -75,7 +75,8 @@ export function render(metric: Metric, data: PiData, host?: string): Rendered {
 		case "disk": {
 			const v = data.diskPercent;
 			if (v == null) return waiting(metric, hostLabel);
-			const sub = data.diskUsed != null && data.diskTotal != null ? `${bytesToGB(data.diskUsed)}/${bytesToGB(data.diskTotal)}` : undefined;
+			const mount = data.diskMount ? ` · ${data.diskMount}` : "";
+			const sub = data.diskUsed != null && data.diskTotal != null ? `${bytesToGB(data.diskUsed)}/${bytesToGB(data.diskTotal)}${mount}` : undefined;
 			return { image: card({ host: hostLabel, label: "DISK", big: `${Math.round(v)}%`, sub, accent: heat(v / 100), bar: v / 100 }), title: "" };
 		}
 		case "uptime": {
