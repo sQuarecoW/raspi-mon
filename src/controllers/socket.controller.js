@@ -1,5 +1,5 @@
 import { Server } from "socket.io"
-import { byValue, byNumber } from 'sort-es'
+import { exec } from "child_process"
 
 import si from "systeminformation"
 
@@ -162,28 +162,37 @@ export default class SocketController {
 			.catch((error) => console.error(error));
 	}
 
-	static async getProcessList() {
-		si.processes()
-			.then((processes) =>  {
-				const topTen = processes
-								.list
-								.sort(byValue(p => p.cpu, byNumber({desc : true})))
-								.slice(0, 6)
-								.map(p => {
-									return {
-										name: p.name,
-										cpu: parseFloat(p.cpu).toFixed(2),
-										memory: parseFloat(p.mem).toFixed(2),
-										pid: p.pid,
-										path: p.path
-									}
-								})
+	static getProcessList() {
+		// A narrow, direct `ps` is far cheaper than systeminformation's full
+		// sweep: four columns only, sorted by the kernel, and we keep the top
+		// few. `comm` is the process name, so there are no expensive per-process
+		// cmdline reads.
+		const cmd =
+			process.platform === "darwin"
+				? "ps -Ac -o pid,pcpu,pmem,comm -r" // BSD / macOS (dev)
+				: "ps -eo pid,pcpu,pmem,comm --sort=-pcpu --no-headers" // Linux / Raspberry Pi
 
-				SocketController.io.emit('processList', topTen)
-			})
-			.catch((error) =>  {
-				console.log(error)
-			})
+		exec(cmd, { timeout: 5000, maxBuffer: 1024 * 1024 }, (error, stdout) => {
+			if (error) {
+				console.error(error)
+				return
+			}
+
+			const list = stdout
+				.trim()
+				.split("\n")
+				.map((line) => line.trim().split(/\s+/))
+				.filter((p) => /^\d+$/.test(p[0])) // drop header / blank lines
+				.slice(0, 6)
+				.map(([pid, cpu, mem, ...name]) => ({
+					name: name.join(" "),
+					cpu: parseFloat(cpu).toFixed(2),
+					memory: parseFloat(mem).toFixed(2),
+					pid,
+				}))
+
+			SocketController.io.emit("processList", list)
+		})
 	}
 }
 
