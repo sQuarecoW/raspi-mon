@@ -21,15 +21,15 @@
   },
   "homepage": "https://github.com/sQuarecoW/raspi-mon#readme",
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.17.3",
-    "helmet": "^5.0.2",
-    "socket.io": "^4.4.1",
-    "sort-es": "^1.4.8",
-    "systeminformation": "^5.11.0"
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "socket.io": "^4.8.3",
+    "sort-es": "^1.7.18",
+    "systeminformation": "^5.33.0"
   },
   "devDependencies": {
-    "eslint": "^8.8.0"
+    "eslint": "^10.7.0"
   },
   "optionalDependencies": {
     "osx-temperature-sensor": "^1.0.7"
