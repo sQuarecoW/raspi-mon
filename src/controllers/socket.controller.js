@@ -60,6 +60,7 @@ export default class SocketController {
 	static #memoryUsage = [];
 	static #cpuUsage = [];
 	static #temp = [];
+	static #disk = null;
 
     static io;
 
@@ -80,6 +81,9 @@ export default class SocketController {
 			socket.emit("cpu:init", SocketController.#cpuUsage);
 			socket.emit("memory:init", SocketController.#memoryUsage);
 			socket.emit("temp:init", SocketController.#temp);
+			// Disk polls slowly (30s); give the first client a value right away.
+			if (SocketController.#disk) socket.emit("disk", SocketController.#disk);
+			else SocketController.getDiskUsage();
 
 			socket.on("getSystemInfo", () => {
 				// console.log("getSystemInfo");
@@ -89,6 +93,7 @@ export default class SocketController {
 
 		SocketController.monitorSystem();
 		SocketController.monitorProcesses();
+		SocketController.monitorDisk();
 		SocketController.systemTime();
 
 		return SocketController.io;
@@ -149,6 +154,23 @@ export default class SocketController {
 		setTimeout(() => {
 			SocketController.monitorProcesses();
 		}, SocketController.#PROCESS_INTERVAL);
+	}
+
+	// Disk usage changes slowly, so poll it rarely.
+	static #DISK_INTERVAL = 30000;
+
+	static async monitorDisk() {
+		if (SocketController.io.engine.clientsCount > 0) {
+			try {
+				await SocketController.getDiskUsage()
+			} catch (error) {
+				console.error('monitorDisk cycle failed:', error)
+			}
+		}
+
+		setTimeout(() => {
+			SocketController.monitorDisk();
+		}, SocketController.#DISK_INTERVAL);
 	}
 
 	static systemTime() {
@@ -214,6 +236,30 @@ export default class SocketController {
 				SocketController.#temp = SocketController.#temp.slice(-50)
 
 				SocketController.io.emit("temp", temp)
+			})
+			.catch((error) => console.error(error));
+	}
+
+	static async getDiskUsage() {
+		si.fsSize()
+			.then((data) => {
+				// The root filesystem is what people mean by "disk"; fall back to
+				// the largest mount if "/" isn't reported.
+				const root =
+					data.find((d) => d.mount === "/") ||
+					data.slice().sort((a, b) => b.size - a.size)[0]
+				if (!root) return
+
+				const disk = {
+					total: root.size,
+					used: root.used,
+					available: root.available,
+					use: root.use, // percent (0-100)
+					mount: root.mount,
+					time: Date.now()
+				}
+				SocketController.#disk = disk
+				SocketController.io.emit("disk", disk)
 			})
 			.catch((error) => console.error(error));
 	}

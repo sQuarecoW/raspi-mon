@@ -1,6 +1,6 @@
 import type { PiData } from "./pi-connection";
 
-export type Metric = "cpu" | "memory" | "temp" | "uptime";
+export type Metric = "cpu" | "memory" | "temp" | "disk" | "uptime";
 
 /** Linear interpolate between two #rrggbb colors. */
 function lerpColor(a: string, b: string, t: number): string {
@@ -72,6 +72,12 @@ export function render(metric: Metric, data: PiData, host?: string): Rendered {
 			const frac = (v - 30) / (85 - 30);
 			return { image: card({ host: hostLabel, label: "TEMP", big: `${Math.round(v)}°`, accent: heat(frac), bar: frac }), title: "" };
 		}
+		case "disk": {
+			const v = data.diskPercent;
+			if (v == null) return waiting(metric, hostLabel);
+			const sub = data.diskUsed != null && data.diskTotal != null ? `${bytesToGB(data.diskUsed)}/${bytesToGB(data.diskTotal)}` : undefined;
+			return { image: card({ host: hostLabel, label: "DISK", big: `${Math.round(v)}%`, sub, accent: heat(v / 100), bar: v / 100 }), title: "" };
+		}
 		case "uptime": {
 			const up = data.uptime != null ? uptimeShort(data.uptime) : "—";
 			return { image: card({ host: hostLabel, label: "UPTIME", big: up, accent: "#3b82f6" }), title: "" };
@@ -84,7 +90,7 @@ function waiting(metric: Metric, host: string): Rendered {
 }
 
 function label(metric: Metric): string {
-	return { cpu: "CPU", memory: "MEM", temp: "TEMP", uptime: "UPTIME" }[metric];
+	return { cpu: "CPU", memory: "MEM", temp: "TEMP", disk: "DISK", uptime: "UPTIME" }[metric];
 }
 
 function truncate(s: string, max: number): string {

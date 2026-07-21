@@ -99,6 +99,21 @@ body {
 .proc tbody tr:last-child td { border-bottom: 0; }
 .muted { color: var(--muted); }
 
+.gauge {
+	height: 16px;
+	background: var(--border);
+	border-radius: 8px;
+	overflow: hidden;
+	margin: 20px 0 12px;
+}
+.gauge-fill {
+	height: 100%;
+	width: 0;
+	border-radius: 8px;
+	background: var(--off);
+	transition: width .4s ease, background-color .4s ease;
+}
+
 /* uPlot dark-mode legibility */
 @media (prefers-color-scheme: dark) {
 	.u-legend { color: var(--muted); }

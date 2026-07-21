@@ -16,6 +16,9 @@ export type PiData = {
 	memUsed?: number; // bytes
 	memTotal?: number; // bytes
 	temp?: number | null; // °C (null = no sensor)
+	diskPercent?: number; // %
+	diskUsed?: number; // bytes
+	diskTotal?: number; // bytes
 	uptime?: number; // seconds
 	hostname?: string;
 };
@@ -65,6 +68,7 @@ class PiConnection {
 		this.socket.on("memory", (row) => this.onMem(row));
 		this.socket.on("temp:init", (rows) => this.onTemp(last(rows)));
 		this.socket.on("temp", (row) => this.onTemp(row));
+		this.socket.on("disk", (d) => this.onDisk(d));
 		this.socket.on("systemTime", (t) => {
 			if (t && typeof t.uptime === "number") {
 				this.data.uptime = t.uptime;
@@ -103,6 +107,15 @@ class PiConnection {
 	private onTemp(r?: { main?: number | null }): void {
 		if (r && "main" in r) {
 			this.data.temp = r.main ?? null;
+			this.push();
+		}
+	}
+
+	private onDisk(r?: { total?: number; used?: number; use?: number }): void {
+		if (r && typeof r.total === "number" && r.total > 0 && typeof r.used === "number") {
+			this.data.diskTotal = r.total;
+			this.data.diskUsed = r.used;
+			this.data.diskPercent = typeof r.use === "number" ? r.use : (r.used / r.total) * 100;
 			this.push();
 		}
 	}

@@ -1,0 +1,4 @@
+2026-07-21T14:10:14.568Z DEBUG RegistrationParameters: port=28196
+2026-07-21T14:10:14.569Z DEBUG RegistrationParameters: pluginUUID=4b48b4c052fbe083a78603f5be95d453
+2026-07-21T14:10:14.569Z DEBUG RegistrationParameters: registerEvent=registerPlugin
+2026-07-21T14:10:14.569Z DEBUG RegistrationParameters: info={"application":{"font":".AppleSystemUIFont","language":"en","platform":"mac","platformVersion":"27.0.0","version":"7.5.0.22885"},"colors":{"buttonPressedBackgroundColor":"#303030FF","buttonPressedBorderColor":"#646464FF","buttonPressedTextColor":"#969696FF","disabledColor":"#007AFF59","highlightColor":"#007AFFFF","mouseDownColor":"#005CD7FF"},"devicePixelRatio":2,"devices":[{"id":"cc03ac766364b42cb5763597e5d13c26","name":"MCP Deck","size":{"columns":8,"rows":4},"type":14},{"id":"e87921296d81f6a098b0b77446c5a78a","name":"Stream Deck","size":{"columns":5,"rows":3},"type":0}],"plugin":{"uuid":"com.squarecow.raspi-mon","version":"1.0.0.0"}}

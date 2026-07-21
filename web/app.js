@@ -12,6 +12,15 @@ const bytes = (n) => {
 	return `${n.toFixed(i ? 1 : 0)} ${u[i]}`;
 };
 
+// green -> amber -> red as fraction goes 0 -> 1
+const heatColor = (frac) => {
+	const f = Math.max(0, Math.min(1, frac));
+	const lerp = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+	const green = [34, 197, 94], amber = [245, 158, 11], red = [239, 68, 68];
+	const c = f < 0.5 ? lerp(green, amber, f / 0.5) : lerp(amber, red, (f - 0.5) / 0.5);
+	return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+};
+
 const uptimeStr = (s) => {
 	if (s == null) return '—';
 	s = Math.floor(s);
@@ -121,6 +130,18 @@ const memLabel = (r) => {
 };
 socket.on('memory:init', (rows) => { memChart.init(rows, memPick); memLabel(rows[rows.length - 1]); });
 socket.on('memory', (row) => { memChart.append(row, memPick); memLabel(row); });
+
+// --- Disk -------------------------------------------------------------------
+socket.on('disk', (d) => {
+	if (!d || !d.total) return;
+	const pct = d.use != null ? d.use : (d.used / d.total) * 100;
+	$('disk-val').textContent = `${Math.round(pct)}%`;
+	const fill = $('disk-fill');
+	fill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+	fill.style.background = heatColor(pct / 100);
+	const mount = d.mount && d.mount !== '/' ? ` (${d.mount})` : '';
+	$('disk-detail').textContent = `${bytes(d.used)} / ${bytes(d.total)} used${mount}`;
+});
 
 // --- CPU temperature --------------------------------------------------------
 // A host without a sensor reports null/0; keep the axis but show a dash.
