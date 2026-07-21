@@ -1,0 +1,50 @@
+{
+	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+	"UUID": "com.squarecow.raspi-mon",
+	"Name": "raspi-mon",
+	"Version": "1.0.0.0",
+	"Author": "sQuarecoW",
+	"URL": "https://github.com/sQuarecoW/raspi-mon",
+	"Description": "Show Raspberry Pi CPU, memory, temperature and uptime from raspi-mon on your Stream Deck.",
+	"Category": "raspi-mon",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"Icon": "imgs/plugin/marketplace",
+	"SDKVersion": 2,
+	"CodePath": "bin/plugin.js",
+	"Software": {
+		"MinimumVersion": "6.5"
+	},
+	"OS": [
+		{
+			"Platform": "mac",
+			"MinimumVersion": "12"
+		},
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "20",
+		"Debug": "enabled"
+	},
+	"Actions": [
+		{
+			"Name": "Metric",
+			"UUID": "com.squarecow.raspi-mon.metric",
+			"Icon": "imgs/actions/metric/icon",
+			"Tooltip": "Show a raspi-mon metric (CPU, memory, temperature or uptime)",
+			"PropertyInspectorPath": "ui/metric.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/metric/key",
+					"TitleAlignment": "middle",
+					"ShowTitle": false
+				}
+			]
+		}
+	]
+}

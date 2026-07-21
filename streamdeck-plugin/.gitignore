@@ -1,0 +1,4 @@
+node_modules
+dist
+com.squarecow.raspi-mon.sdPlugin/bin
+*.streamDeckPlugin

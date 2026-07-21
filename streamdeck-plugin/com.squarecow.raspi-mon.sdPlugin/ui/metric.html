@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--
+			sdpi-components auto-connects to the Stream Deck and persists each
+			control's value into the action's settings (keyed by `setting=`).
+			It is loaded from Elgato's CDN, so the desktop needs internet the
+			first time the Property Inspector opens (it is then cached).
+		-->
+		<script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+	</head>
+	<body>
+		<sdpi-item label="Raspberry Pi host">
+			<sdpi-textfield setting="host" placeholder="raspberrypi.local" required></sdpi-textfield>
+		</sdpi-item>
+
+		<sdpi-item label="Port">
+			<sdpi-textfield setting="port" placeholder="1608" type="number"></sdpi-textfield>
+		</sdpi-item>
+
+		<sdpi-item label="Metric">
+			<sdpi-select setting="metric" default="cpu">
+				<option value="cpu">CPU load</option>
+				<option value="memory">Memory</option>
+				<option value="temp">CPU temperature</option>
+				<option value="uptime">Uptime / host</option>
+			</sdpi-select>
+		</sdpi-item>
+
+		<sdpi-item>
+			<sdpi-hint>Tip: press the key to open the full dashboard in your browser.</sdpi-hint>
+		</sdpi-item>
+	</body>
+</html>
