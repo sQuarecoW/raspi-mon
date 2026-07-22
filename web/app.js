@@ -211,7 +211,10 @@ socket.on('systemInfo', (info) => {
 	const sys = info.system || {};
 	const net = info.networkInterfaces || {};
 
-	if (os.hostname) $('hostname').textContent = os.hostname;
+	if (os.hostname) {
+		$('hostname').textContent = os.hostname;
+		document.title = `${os.hostname} · raspi-mon`;
+	}
 	const model = [sys.manufacturer, sys.model].filter(Boolean).join(' ');
 	$('model').textContent = model;
 
