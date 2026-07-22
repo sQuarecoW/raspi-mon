@@ -6,6 +6,20 @@ import { fileURLToPath } from "url"
 
 import si from "systeminformation"
 
+// Repo root (…/src/controllers/socket.controller.js -> …).
+const REPO_ROOT = path.resolve(fileURLToPath(import.meta.url), "../../..")
+const GH_BASE = "https://github.com/sQuarecoW/raspi-mon"
+
+// Parse "v1.2.3" (ignoring any -N-gHASH suffix) into [1,2,3], or null.
+function parseVer(s) {
+	const m = (s || "").match(/(\d+)\.(\d+)\.(\d+)/)
+	return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null
+}
+function cmpVer(a, b) {
+	for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] - b[i]
+	return 0
+}
+
 // Parse the *second* frame of `top -bn2` output. top computes instantaneous
 // CPU by diffing two samples (like htop), so the values match `top`/`htop` and
 // there is no newborn-process artifact. Default columns are:
@@ -65,6 +79,8 @@ export default class SocketController {
 	static #temp = [];
 	static #disk = null;
 	static #version = null;
+	static #update = null;
+	static #updating = false;
 
     static io;
 
@@ -90,10 +106,14 @@ export default class SocketController {
 			else SocketController.getDiskUsage();
 
 			if (SocketController.#version) socket.emit("version", SocketController.#version);
+			if (SocketController.#update) socket.emit("update", SocketController.#update);
 
 			socket.on("getSystemInfo", () => {
 				// console.log("getSystemInfo");
 				SocketController.systemInfo();
+			});
+			socket.on("runUpdate", () => {
+				SocketController.runUpdate();
 			});
 		});
 
@@ -125,29 +145,85 @@ export default class SocketController {
 	// `git describe`), falling back to package.json. Emitted to clients so the
 	// dashboard can show it and link to the matching GitHub release.
 	static resolveVersion() {
-		const repoRoot = path.resolve(fileURLToPath(import.meta.url), "../../..")
-		const ghBase = "https://github.com/sQuarecoW/raspi-mon"
-
 		const finish = (version) => {
 			const tag = version.match(/^v?\d+\.\d+\.\d+/)
 			const url = tag
-				? `${ghBase}/releases/tag/${tag[0]}`
-				: `${ghBase}/commit/${version.replace(/-dirty$/, "")}`
+				? `${GH_BASE}/releases/tag/${tag[0]}`
+				: `${GH_BASE}/commit/${version.replace(/-dirty$/, "")}`
 			SocketController.#version = { version, url }
 			SocketController.io.emit("version", SocketController.#version)
+			// Once we know our version, check GitHub for a newer tag.
+			SocketController.checkForUpdate()
 		}
 
-		exec("git describe --tags --always --dirty", { cwd: repoRoot, timeout: 4000 }, (error, stdout) => {
+		exec("git describe --tags --always --dirty", { cwd: REPO_ROOT, timeout: 4000 }, (error, stdout) => {
 			if (!error && stdout.trim()) {
 				finish(stdout.trim())
 				return
 			}
 			try {
-				const pkg = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8"))
+				const pkg = JSON.parse(readFileSync(path.join(REPO_ROOT, "package.json"), "utf8"))
 				finish(`v${pkg.version}`)
 			} catch (e) {
 				console.error("resolveVersion failed:", e)
 			}
+		})
+	}
+
+	// Ask GitHub (via the git remote) for the highest version tag and compare it
+	// to what's running. Repeats hourly. No API token needed — public repo.
+	static checkForUpdate() {
+		exec("git ls-remote --tags origin", { cwd: REPO_ROOT, timeout: 15000 }, (error, stdout) => {
+			if (!error && stdout) {
+				const remote = stdout
+					.split("\n")
+					.map((l) => (l.match(/refs\/tags\/(v?\d+\.\d+\.\d+)$/) || [])[1])
+					.filter(Boolean)
+					.map((t) => ({ tag: t, ver: parseVer(t) }))
+					.filter((x) => x.ver)
+					.sort((a, b) => cmpVer(b.ver, a.ver))[0]
+
+				const current = SocketController.#version && parseVer(SocketController.#version.version)
+				if (remote && current) {
+					const available = cmpVer(remote.ver, current) > 0
+					SocketController.#update = {
+						available,
+						latest: remote.tag,
+						current: `v${current.join(".")}`,
+						url: `${GH_BASE}/releases/tag/${remote.tag}`
+					}
+					SocketController.io.emit("update", SocketController.#update)
+				}
+			}
+
+			setTimeout(() => SocketController.checkForUpdate(), 60 * 60 * 1000)
+		})
+	}
+
+	// Triggered from the dashboard: pull the latest code and reinstall, then
+	// exit so systemd (Restart=always) relaunches with the new version. Runs npm
+	// via the same directory as the running node so it works under nvm too.
+	static runUpdate() {
+		if (SocketController.#updating) return
+		SocketController.#updating = true
+		SocketController.io.emit("updateStatus", { state: "running", message: "Pulling latest and installing…" })
+
+		const npmBin = path.join(path.dirname(process.execPath), "npm")
+		const cmd = `git pull --ff-only && "${npmBin}" ci --omit=dev`
+
+		exec(cmd, { cwd: REPO_ROOT, timeout: 5 * 60 * 1000 }, (error, stdout, stderr) => {
+			if (error) {
+				SocketController.#updating = false
+				console.error("update failed:", stderr || error)
+				SocketController.io.emit("updateStatus", {
+					state: "error",
+					message: (stderr || error.message || "update failed").trim().slice(-280)
+				})
+				return
+			}
+			SocketController.io.emit("updateStatus", { state: "restarting", message: "Restarting…" })
+			// Flush the message, then exit; systemd restarts us with the new code.
+			setTimeout(() => process.exit(0), 600)
 		})
 	}
 

@@ -168,6 +168,37 @@ socket.on('version', (v) => {
 	el.hidden = false;
 });
 
+// --- Self-update ------------------------------------------------------------
+const updateBtn = $('update-btn');
+
+socket.on('update', (u) => {
+	if (!u || !u.available) { updateBtn.hidden = true; return; }
+	updateBtn.textContent = `Update → ${u.latest}`;
+	updateBtn.title = `New version ${u.latest} available on GitHub`;
+	updateBtn.disabled = false;
+	updateBtn.hidden = false;
+});
+
+updateBtn.addEventListener('click', () => {
+	const latest = updateBtn.textContent.replace('Update → ', '');
+	if (!confirm(`Update raspi-mon to ${latest}? The service will restart briefly.`)) return;
+	socket.emit('runUpdate');
+	updateBtn.disabled = true;
+	updateBtn.textContent = 'Updating…';
+});
+
+socket.on('updateStatus', (s) => {
+	if (!s) return;
+	updateBtn.hidden = false;
+	if (s.state === 'running') { updateBtn.disabled = true; updateBtn.textContent = 'Updating…'; }
+	else if (s.state === 'restarting') { updateBtn.disabled = true; updateBtn.textContent = 'Restarting…'; }
+	else if (s.state === 'error') {
+		updateBtn.disabled = false;
+		updateBtn.textContent = 'Update failed — retry';
+		if (s.message) updateBtn.title = s.message;
+	}
+});
+
 socket.on('systemTime', (t) => {
 	if (!t) return;
 	$('uptime').textContent = uptimeStr(t.uptime);
