@@ -1,6 +1,7 @@
 import { Server } from "socket.io"
 import { exec } from "child_process"
 import { readFileSync } from "fs"
+import os from "os"
 import path from "path"
 import { fileURLToPath } from "url"
 
@@ -78,9 +79,20 @@ export default class SocketController {
 	static #cpuUsage = [];
 	static #temp = [];
 	static #disk = null;
+	static #load = null;
+	static #swap = null;
+	static #aircraft = null;
 	static #version = null;
 	static #update = null;
 	static #updating = false;
+
+	// Where ADS-B decoders publish live aircraft data; only present on a feeder.
+	static #AIRCRAFT_PATHS = [
+		"/run/readsb/aircraft.json",
+		"/run/dump1090-fa/aircraft.json",
+		"/run/dump1090/aircraft.json",
+		"/run/adsbexchange-feed/aircraft.json"
+	];
 
     static io;
 
@@ -105,6 +117,9 @@ export default class SocketController {
 			if (SocketController.#disk) socket.emit("disk", SocketController.#disk);
 			else SocketController.getDiskUsage();
 
+			if (SocketController.#load) socket.emit("load", SocketController.#load);
+			if (SocketController.#swap) socket.emit("swap", SocketController.#swap);
+			if (SocketController.#aircraft) socket.emit("aircraft", SocketController.#aircraft);
 			if (SocketController.#version) socket.emit("version", SocketController.#version);
 			if (SocketController.#update) socket.emit("update", SocketController.#update);
 
@@ -120,6 +135,7 @@ export default class SocketController {
 		SocketController.monitorSystem();
 		SocketController.monitorProcesses();
 		SocketController.monitorDisk();
+		SocketController.monitorAircraft();
 		SocketController.systemTime();
 		SocketController.resolveVersion();
 
@@ -244,6 +260,7 @@ export default class SocketController {
 				await SocketController.getCpuUsage()
 				await SocketController.getCpuTemp()
 				await SocketController.getNetworkStats()
+				SocketController.emitLoad()
 			} catch (error) {
 				console.error('monitorSystem cycle failed:', error)
 			}
@@ -317,6 +334,11 @@ export default class SocketController {
 				// Broadcast just the new point; new clients get the history via
 				// the "memory:init" snapshot on connect.
 				SocketController.io.emit("memory", mem)
+
+				// Swap is a separate tile (hidden by the client when there's none).
+				const swap = { total: data.swaptotal, used: data.swapused, time: Date.now() }
+				SocketController.#swap = swap
+				SocketController.io.emit("swap", swap)
 			})
 			.catch((error) => console.error(error));
 	}
@@ -369,6 +391,55 @@ export default class SocketController {
 				})
 			})
 			.catch((error) => console.error(error));
+	}
+
+	static emitLoad() {
+		// os.loadavg() is the 1/5/15-minute run-queue load; free and portable.
+		const load = {
+			avg: os.loadavg().map((n) => Math.round(n * 100) / 100),
+			cores: os.cpus().length,
+			time: Date.now()
+		}
+		SocketController.#load = load
+		SocketController.io.emit("load", load)
+	}
+
+	// Poll the ADS-B decoder's aircraft.json if this box is a feeder. When no
+	// such file exists nothing is emitted, so the dashboard hides the tile.
+	static async monitorAircraft() {
+		if (SocketController.io.engine.clientsCount > 0) {
+			try {
+				SocketController.getAircraft()
+			} catch (error) {
+				console.error('monitorAircraft cycle failed:', error)
+			}
+		}
+
+		setTimeout(() => {
+			SocketController.monitorAircraft();
+		}, 3000);
+	}
+
+	static getAircraft() {
+		for (const file of SocketController.#AIRCRAFT_PATHS) {
+			let raw
+			try {
+				raw = readFileSync(file, "utf8")
+			} catch {
+				continue // not this path; try the next
+			}
+			try {
+				const data = JSON.parse(raw)
+				const list = Array.isArray(data.aircraft) ? data.aircraft : []
+				const positions = list.filter((a) => typeof a.lat === "number" && typeof a.lon === "number").length
+				const aircraft = { count: list.length, positions, messages: data.messages, time: Date.now() }
+				SocketController.#aircraft = aircraft
+				SocketController.io.emit("aircraft", aircraft)
+			} catch {
+				// Malformed/partial write this tick; skip it.
+			}
+			return // a feeder file was found; done
+		}
 	}
 
 	static async getDiskUsage() {

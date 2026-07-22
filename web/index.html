@@ -43,6 +43,11 @@
 			<div class="chart" id="temp-chart"></div>
 		</section>
 
+		<section class="card" id="aircraft-card" hidden>
+			<div class="card-head"><h2>Aircraft</h2><span class="metric" id="aircraft-val">—</span></div>
+			<div class="sub" id="aircraft-detail"></div>
+		</section>
+
 		<section class="card">
 			<div class="card-head"><h2>Disk usage</h2><span class="metric" id="disk-val">—</span></div>
 			<div class="gauge"><div class="gauge-fill" id="disk-fill"></div></div>
@@ -58,6 +63,21 @@
 			<div class="card-head"><h2>Network</h2><span class="sub" id="net-iface"></span></div>
 			<div class="netrow"><span class="netlabel">↓ Download</span><span class="netval" id="net-rx">—</span></div>
 			<div class="netrow"><span class="netlabel">↑ Upload</span><span class="netval" id="net-tx">—</span></div>
+		</section>
+
+		<section class="card">
+			<div class="card-head"><h2>Load average</h2><span class="sub" id="load-cores"></span></div>
+			<div class="loadrow">
+				<div class="loadcell"><span class="loadnum" id="load-1">—</span><span class="loadlab">1 min</span></div>
+				<div class="loadcell"><span class="loadnum" id="load-5">—</span><span class="loadlab">5 min</span></div>
+				<div class="loadcell"><span class="loadnum" id="load-15">—</span><span class="loadlab">15 min</span></div>
+			</div>
+		</section>
+
+		<section class="card" id="swap-card" hidden>
+			<div class="card-head"><h2>Swap</h2><span class="metric" id="swap-val">—</span></div>
+			<div class="gauge"><div class="gauge-fill" id="swap-fill"></div></div>
+			<div class="sub" id="swap-detail"></div>
 		</section>
 
 		<section class="card span-2">

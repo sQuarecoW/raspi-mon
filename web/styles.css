@@ -149,6 +149,11 @@ body {
 .netlabel { color: var(--muted); font-size: 13px; }
 .netval { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
+.loadrow { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0 4px; }
+.loadcell { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.loadnum { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.loadlab { color: var(--muted); font-size: 12px; }
+
 /* uPlot dark-mode legibility */
 @media (prefers-color-scheme: dark) {
 	.u-legend { color: var(--muted); }

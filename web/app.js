@@ -152,6 +152,43 @@ socket.on('network', (n) => {
 	$('net-tx').textContent = rate(n.tx);
 });
 
+// --- Load average -----------------------------------------------------------
+socket.on('load', (l) => {
+	if (!l || !l.avg) return;
+	const [a1, a5, a15] = l.avg;
+	$('load-1').textContent = a1.toFixed(2);
+	$('load-5').textContent = a5.toFixed(2);
+	$('load-15').textContent = a15.toFixed(2);
+	if (l.cores) $('load-cores').textContent = `${l.cores} core${l.cores === 1 ? '' : 's'}`;
+	// Tint the 1-min figure once it approaches saturating the cores.
+	const ratio = l.cores ? a1 / l.cores : 0;
+	$('load-1').style.color = ratio > 0.7 ? heatColor(ratio) : '';
+});
+
+// --- Swap (hidden when there is none) ---------------------------------------
+socket.on('swap', (s) => {
+	if (!s || !s.total) { $('swap-card').hidden = true; return; }
+	const pct = (s.used / s.total) * 100;
+	$('swap-val').textContent = `${Math.round(pct)}%`;
+	const fill = $('swap-fill');
+	fill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+	fill.style.background = heatColor(pct / 100);
+	$('swap-detail').textContent = `${bytes(s.used)} / ${bytes(s.total)} used`;
+	$('swap-card').hidden = false;
+});
+
+// --- Aircraft (only appears on a feeder) ------------------------------------
+const compact = (n) => n == null ? '—' : (n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n));
+socket.on('aircraft', (a) => {
+	if (!a) return;
+	$('aircraft-val').textContent = a.count != null ? a.count : '—';
+	const parts = [];
+	if (a.positions != null) parts.push(`${a.positions} with position`);
+	if (a.messages != null) parts.push(`${compact(a.messages)} msgs`);
+	$('aircraft-detail').textContent = parts.join(' · ');
+	$('aircraft-card').hidden = false;
+});
+
 // --- CPU temperature --------------------------------------------------------
 // A host without a sensor reports null/0; keep the axis but show a dash.
 const tempPick = (r) => r.main;
