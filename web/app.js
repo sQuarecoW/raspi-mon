@@ -162,7 +162,7 @@ socket.on('temp', (row) => { tempChart.append(row, tempPick); tempLabel(row); })
 socket.on('systemTime', (t) => {
 	if (!t) return;
 	$('uptime').textContent = uptimeStr(t.uptime);
-	if (t.current) $('clock').textContent = new Date(t.current).toLocaleTimeString();
+	if (t.current) $('clock').textContent = new Date(t.current).toLocaleTimeString('nl-NL', { hour12: false });
 });
 
 socket.on('systemInfo', (info) => {
