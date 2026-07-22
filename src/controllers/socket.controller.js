@@ -1,5 +1,8 @@
 import { Server } from "socket.io"
 import { exec } from "child_process"
+import { readFileSync } from "fs"
+import path from "path"
+import { fileURLToPath } from "url"
 
 import si from "systeminformation"
 
@@ -61,6 +64,7 @@ export default class SocketController {
 	static #cpuUsage = [];
 	static #temp = [];
 	static #disk = null;
+	static #version = null;
 
     static io;
 
@@ -85,6 +89,8 @@ export default class SocketController {
 			if (SocketController.#disk) socket.emit("disk", SocketController.#disk);
 			else SocketController.getDiskUsage();
 
+			if (SocketController.#version) socket.emit("version", SocketController.#version);
+
 			socket.on("getSystemInfo", () => {
 				// console.log("getSystemInfo");
 				SocketController.systemInfo();
@@ -95,6 +101,7 @@ export default class SocketController {
 		SocketController.monitorProcesses();
 		SocketController.monitorDisk();
 		SocketController.systemTime();
+		SocketController.resolveVersion();
 
 		return SocketController.io;
     }
@@ -112,6 +119,36 @@ export default class SocketController {
 			.then( (data) => {
 				SocketController.io.emit("systemInfo", data);
 			})
+	}
+
+	// Report the running version from the git checkout (nearest tag via
+	// `git describe`), falling back to package.json. Emitted to clients so the
+	// dashboard can show it and link to the matching GitHub release.
+	static resolveVersion() {
+		const repoRoot = path.resolve(fileURLToPath(import.meta.url), "../../..")
+		const ghBase = "https://github.com/sQuarecoW/raspi-mon"
+
+		const finish = (version) => {
+			const tag = version.match(/^v?\d+\.\d+\.\d+/)
+			const url = tag
+				? `${ghBase}/releases/tag/${tag[0]}`
+				: `${ghBase}/commit/${version.replace(/-dirty$/, "")}`
+			SocketController.#version = { version, url }
+			SocketController.io.emit("version", SocketController.#version)
+		}
+
+		exec("git describe --tags --always --dirty", { cwd: repoRoot, timeout: 4000 }, (error, stdout) => {
+			if (!error && stdout.trim()) {
+				finish(stdout.trim())
+				return
+			}
+			try {
+				const pkg = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8"))
+				finish(`v${pkg.version}`)
+			} catch (e) {
+				console.error("resolveVersion failed:", e)
+			}
+		})
 	}
 
 	// Cheap /proc reads (memory, CPU load, temperature) refresh quickly...

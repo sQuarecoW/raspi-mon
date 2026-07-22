@@ -1,6 +1,6 @@
 {
   "name": "raspi-mon",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Raspberry Pi Monitor",
   "main": "src/index.js",
   "bin": {

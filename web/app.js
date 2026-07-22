@@ -159,6 +159,15 @@ const tempLabel = (r) => { if (r) $('temp-val').textContent = r.main ? `${r.main
 socket.on('temp:init', (rows) => { tempChart.init(rows, tempPick); tempLabel(rows[rows.length - 1]); });
 socket.on('temp', (row) => { tempChart.append(row, tempPick); tempLabel(row); });
 
+socket.on('version', (v) => {
+	if (!v || !v.version) return;
+	const el = $('version');
+	el.textContent = v.version;
+	if (v.url) el.href = v.url;
+	el.title = 'raspi-mon — view on GitHub';
+	el.hidden = false;
+});
+
 socket.on('systemTime', (t) => {
 	if (!t) return;
 	$('uptime').textContent = uptimeStr(t.uptime);
